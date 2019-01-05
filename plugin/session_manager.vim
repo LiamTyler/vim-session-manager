@@ -59,5 +59,6 @@ function! g:StartSession()
   if found != ''
     execute 'source ' . found
   endif
-  " TODO save session number
+
+  let g:session_number = split(found, '__')[-1]
 endfunction
