@@ -62,3 +62,6 @@ function! g:StartSession()
 
   let g:session_number = split(found, '__')[-1]
 endfunction
+
+autocmd VimEnter * silent! call StartSession() | redraw!
+autocmd VimLeave * silent! call EndSession()
