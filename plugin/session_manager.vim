@@ -24,21 +24,40 @@ function! g:EndSession()
     " return
   " endif
 
-  let filename = g:session_dir . GetRootGitRepo() . g:session_number
+  let filename = g:session_dir . GetRootGitRepo() . '__' . g:session_number
   if g:session_number < 0
     let session_files = split(globpath(g:session_dir, GetRootGitRepo()), '\n')
     let current_session_number = len(session_files)
-    let filename = g:session_dir . GetRootGitRepo() . current_session_number
+    let filename = g:session_dir . GetRootGitRepo() . '__' . current_session_number
   endif
 
   if empty(glob(g:session_dir))
     execute '!mkdir -p ' . g:session_dir
   endif
 
-  echom "Making session " . filename
   execute "mksession! " . filename
 endfunction
 
 function! g:StartSession()
+  let session_files = split(globpath(g:session_dir, GetRootGitRepo() . '*'), '\n')
+
+  let this_file = expand('%:t')
+  let found = ''
+  for session_file in session_files
+    let rows = readfile(session_file)
+    for row in rows
+      if row =~ '.*edit .*' . this_file . '.*'
+        let found = session_file
+        break
+      endif
+      if found != ''
+        break
+      endif
+    endfor
+  endfor
+
+  if found != ''
+    execute 'source ' . found
+  endif
   " TODO save session number
 endfunction
