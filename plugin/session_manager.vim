@@ -20,9 +20,9 @@ endfunction
 function! g:EndSession()
   let num_tabs = tabpagenr('$')
   let num_splits = winnr('$')
-  " if num_tabs < 2 && num_splits < 2
-    " return
-  " endif
+  if num_tabs < 2 && num_splits < 2
+    return
+  endif
 
   let filename = g:session_dir . GetRootGitRepo() . '__' . g:session_number
   if g:session_number < 0
@@ -63,5 +63,5 @@ function! g:StartSession()
   let g:session_number = split(found, '__')[-1]
 endfunction
 
-autocmd VimEnter * silent! call StartSession() | redraw!
+autocmd VimEnter * nested silent! call StartSession() | redraw!
 autocmd VimLeave * silent! call EndSession()
