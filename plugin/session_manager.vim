@@ -1,5 +1,6 @@
 let g:session_dir = expand('~/.vim/.sessions/')
 let g:session_number = -1
+let g:session_name = ''
 
 function! GetRootGitRepo()
   let full_path = ''
@@ -19,17 +20,22 @@ function! GetRootGitRepo()
 endfunction
 
 function! g:EndSession()
+  let repo = GetRootGitRepo()
+  if len(repo) == 0
+    return
+  endif
+
   let num_tabs = tabpagenr('$')
   let num_splits = winnr('$')
   if num_tabs < 2 && num_splits < 2
     return
   endif
 
-  let filename = g:session_dir . GetRootGitRepo() . '__' . g:session_number
+  let filename = g:session_dir . repo . '__' . g:session_number
   if g:session_number < 0
-    let session_files = split(globpath(g:session_dir, GetRootGitRepo()), '\n')
+    let session_files = split(globpath(g:session_dir, repo), '\n')
     let current_session_number = len(session_files)
-    let filename = g:session_dir . GetRootGitRepo() . '__' . current_session_number
+    let filename = g:session_dir . repo . '__' . current_session_number
   endif
 
   if empty(glob(g:session_dir))
@@ -45,7 +51,7 @@ function! g:StartSession()
     return
   endif
 
-  let session_files = split(globpath(g:session_dir, GetRootGitRepo() . '*'), '\n')
+  let session_files = split(globpath(g:session_dir, repo . '*'), '\n')
 
   let this_file = expand('%:t')
   let found = ''
@@ -67,6 +73,28 @@ function! g:StartSession()
   endif
 
   let g:session_number = split(found, '__')[-1]
+  let g:session_name = found
+endfunction
+
+function GarbageCollectSession()
+  let repo = GetRootGitRepo()
+  if len(repo) == 0 || len(g:session_name) == 0
+    return
+  endif
+
+  let rows = readfile(g:session_name)
+  for row in rows
+    if row =~ 'badd.*'
+      let parts = split(row, ' ')
+      let parts = parts[2:]
+      echom parts
+      let file_name = parts[0]
+      for part in parts
+        file_name = file_name . ' ' . part
+      endfor
+      echom file_name
+    endif
+  endfor
 endfunction
 
 autocmd VimEnter * nested silent! call StartSession() | redraw!
