@@ -14,6 +14,7 @@ function! GetRootGitRepo()
     let path_arg = path_arg . ':h'
   endwhile
 
+  echom git_dir
   return substitute(git_dir, '/', '_', 'g')
 endfunction
 
@@ -39,6 +40,11 @@ function! g:EndSession()
 endfunction
 
 function! g:StartSession()
+  let repo = GetRootGitRepo()
+  if len(repo) == 0
+    return
+  endif
+
   let session_files = split(globpath(g:session_dir, GetRootGitRepo() . '*'), '\n')
 
   let this_file = expand('%:t')
